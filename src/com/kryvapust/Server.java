@@ -11,27 +11,32 @@ import java.util.ArrayList;
 
 public class Server {
     public static void main(String[] args) throws IOException {
-        int port = 8080;
-        ServerSocket serverSocket = new ServerSocket(port); // создание класса сокета сервераб работающего по протоколу TCP
+        int port = 8081;
+        // сокет сервера
+        ServerSocket serverSocket = new ServerSocket(port);
         System.out.printf("Server on port %d started.%n", port);
         while (true) {
-            Socket clientSocket = serverSocket.accept(); // Лисенер подключения
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter((clientSocket.getOutputStream())); // поток записи
-            BufferedWriter writer = new BufferedWriter(outputStreamWriter);// буфер потока записи
-            System.out.println("<Server> BufferedWriter created");
+            // активация листенера сервера
+            Socket clientSocket = serverSocket.accept();
 
-            InputStreamReader inputStreamReader = new InputStreamReader(clientSocket.getInputStream()); // поток чтения
-            BufferedReader reader = new BufferedReader(inputStreamReader); // буфер потока чтения
-            System.out.println("<Server> BufferReader created");
+            BufferedWriter writer = getBufferedWriter(clientSocket);
+            System.out.println("<Server>  BufferedWriter is created - поток для записи.");
+            BufferedReader reader = getBufferedReader(clientSocket);
+            System.out.println("<Server> BufferReader is created - поток для чтения.");
 
-            String request = reader.readLine(); // чтение запроса
+            // чтение запроса
+            String request = reader.readLine();
             System.out.println("Received request: " + request);
 
-            String response = makeTask(request); // вызов метода, выполняющего сортировку полученного массива
+            // вызов метода, выполняющего задание
+            String response = makeTask(request);
             System.out.println("Response to sent: " + response);
 
-            writer.write(response + "\n"); // запись результата в буффер поток вывода
-            writer.flush(); // немедленная отправкаинформации из буффера вывода
+            // запись результата в поток вывода
+            writer.write(response + "\n");
+
+            // отправка ответа
+            writer.flush();
 
             // закрытие потоков чтение и записи и сокета подключенного клиента
             writer.close();
@@ -40,26 +45,47 @@ public class Server {
         }
     }
 
-    private static String makeTask(String request) {
-        String[] split = request.replaceAll("[\\[\\]]", "").split(", ");
-        float[] array = new float[split.length];
-        for (int i = 0; i < split.length; i++) {
-            array[i] = Float.parseFloat(split[i]);
-        }
-        // вызов метода быстрой сортировки
-        qs(array, 0, array.length - 1);
-        // преобразование массива в текст
-        ArrayList<Float> floats = new ArrayList<>();
-        for (float f : array) {
-            floats.add(f);
-        }
-        return floats.toString();
+    private static BufferedReader getBufferedReader(Socket clientSocket) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(clientSocket.getInputStream());
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        return reader;
     }
 
-    // алгоритм быстрой сортировки
-    private static void qs(float[] split, int left, int right) {
+    private static BufferedWriter getBufferedWriter(Socket clientSocket) throws IOException {
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter((clientSocket.getOutputStream()));
+        BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+        return writer;
+    }
+
+    /**
+     * метода, реализующий задание по сортировке полученного массива.
+     * преобразовывает текстовую строку в массив текстовых значений ->
+     * затем преобразовывает из в числа ->
+     * вызовает метод сортировки
+     */
+    private static String makeTask(String request) {
+        String[] split = request.replaceAll("[\\[\\]]", "").split(", ");
+        double[] array = new double[split.length];
+        for (int i = 0; i < split.length; i++) {
+            array[i] = Double.parseDouble(split[i]);
+        }
+        // вызов метода быстрой сортировки
+        quickSort(array, 0, array.length - 1);
+
+        // преобразование массива чисел в текст
+        ArrayList<Double> numbers = new ArrayList<>();
+        for (double f : array) {
+            numbers.add(f);
+        }
+        return numbers.toString();
+    }
+
+    /**
+     * алгоритм быстрой сортировки
+     */
+    private static void quickSort(double[] split, int left, int right) {
         int i, j;
-        float x, y;
+        double x, y;
         i = left;
         j = right;
         x = split[(left + right) / 2];
@@ -76,7 +102,7 @@ public class Server {
             }
         } while (i <= j);
 
-        if (left < j) qs(split, left, j);
-        if (i < right) qs(split, i, right);
+        if (left < j) quickSort(split, left, j);
+        if (i < right) quickSort(split, i, right);
     }
 }

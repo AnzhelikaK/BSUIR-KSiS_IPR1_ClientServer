@@ -11,32 +11,50 @@ import java.util.Scanner;
 
 public class Client {
 
-
     public static void main(String[] args) throws IOException {
-        int port = 8080;
-        Socket socket = new Socket("127.0.0.1", port); // создание сокета клиента на локальном хосту, работающего по протоколу TCP на IP
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream()); // поток записи
-        BufferedWriter writer = new BufferedWriter(outputStreamWriter); // буфер потока записи
-        System.out.println("<Client> BufferedWriter created");
+        int port = 8081;
+        String host = "127.0.0.1";
 
-        InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream()); // поток чтения
-        BufferedReader reader = new BufferedReader(inputStreamReader); // буфер потока чтения
-        System.out.println("<Client> BufferReader created");
+        // сокет клиента
+        Socket socket = new Socket(host, port);
 
+        BufferedWriter writer = getBufferedWriter(socket);
+        System.out.println("<Client> BufferedWriter is created - поток для записи.");
 
-        String request = inputArray(); // ввод вектора (массив чисел с плавающей точкой)
+        BufferedReader reader = getBufferedReader(socket);
+        System.out.println("<Client> BufferReader is created - поток для чтения.");
+
+        // воод данных
+        String request = inputArray();
         System.out.println("Input array for sending: " + request);
 
-        writer.write(request + "\n"); // запись введенного массива в буффер поток вывода
-        writer.flush();  // немедленная отправка информации из буффера вывода
+        // запись введенного массива в поток вывода /
+        writer.write(request + "\n");
+
+        // отправка запроса
+        writer.flush();
         System.out.println("Request is sent.");
-        String result = reader.readLine(); // чтение ответа Сервера
+
+        // чтение ответа Сервера
+        String result = reader.readLine();
         System.out.println("Received result from Server: " + result);
 
         // закрытие потоков чтение и записи и самого сокета
         reader.close();
         writer.close();
         socket.close();
+    }
+
+    private static BufferedReader getBufferedReader(Socket socket) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        return reader;
+    }
+
+    private static BufferedWriter getBufferedWriter(Socket socket) throws IOException {
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
+        BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+        return writer;
     }
 
     private static String inputArray() {
@@ -47,6 +65,7 @@ public class Client {
             double v = scanner.nextDouble();
             array.add(v);
         }
-        return array.toString(); // преобразование введенного массива в текстовый вид
+        // преобразование введенного массива в текстовый вид
+        return array.toString();
     }
 }
