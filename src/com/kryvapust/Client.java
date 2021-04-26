@@ -17,12 +17,12 @@ public class Client {
 
         // сокет клиента
         Socket socket = new Socket(host, port);
-
+        // поток для записи
         BufferedWriter writer = getBufferedWriter(socket);
-        System.out.println("<Client> BufferedWriter is created - поток для записи.");
-
+        System.out.println("<Client> BufferedWriter is created.");
+        // поток для чтения
         BufferedReader reader = getBufferedReader(socket);
-        System.out.println("<Client> BufferReader is created - поток для чтения.");
+        System.out.println("<Client> BufferReader is created.");
 
         // воод данных
         String request = inputArray();
@@ -39,10 +39,14 @@ public class Client {
         String result = reader.readLine();
         System.out.println("Received result from Server: " + result);
 
-        // закрытие потоков чтение и записи и самого сокета
-        reader.close();
-        writer.close();
-        socket.close();
+        System.out.println("Input any request to finish program.");
+        Scanner scanner = new Scanner(System.in);
+        if (scanner.hasNext()) {
+            // закрытие потоков чтение и записи и самого сокета
+            reader.close();
+            writer.close();
+            socket.close();
+        }
     }
 
     private static BufferedReader getBufferedReader(Socket socket) throws IOException {

@@ -19,10 +19,12 @@ public class Server {
             // активация листенера сервера
             Socket clientSocket = serverSocket.accept();
 
+            // поток для записи
             BufferedWriter writer = getBufferedWriter(clientSocket);
-            System.out.println("<Server>  BufferedWriter is created - поток для записи.");
+            System.out.println("<Server>  BufferedWriter is created.");
+            // поток для чтения
             BufferedReader reader = getBufferedReader(clientSocket);
-            System.out.println("<Server> BufferReader is created - поток для чтения.");
+            System.out.println("<Server> BufferReader is created.");
 
             // чтение запроса
             String request = reader.readLine();
